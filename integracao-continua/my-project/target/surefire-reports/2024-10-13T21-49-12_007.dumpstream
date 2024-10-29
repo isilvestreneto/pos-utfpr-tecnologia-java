@@ -1,0 +1,5 @@
+# Created at 2024-10-13T21:49:14.002
+Boot Manifest-JAR contains absolute paths in classpath 'D:\ivneto\Github\pos-tecnologia-em-java\integracao-continua\my-project\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+
