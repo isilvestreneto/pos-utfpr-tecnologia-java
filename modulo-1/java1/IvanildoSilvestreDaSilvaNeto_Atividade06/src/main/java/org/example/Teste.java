@@ -1,6 +1,7 @@
 package org.example;
 
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -9,13 +10,16 @@ import java.util.Scanner;
  */
 public class Teste
 {
-    private Passeio[] veiculosPasseio = new Passeio[5];
-    private Carga[] veiculosCarga = new Carga[5];
-    private Leitura leitura = new Leitura();
+    private final Leitura leitura = new Leitura();
+    private final BDVeiculos bd = new BDVeiculos();
 
     public static void main( String[] args ) {
         Teste teste = new Teste();
-        teste.controlarMenu();
+        try {
+            teste.controlarMenu();
+        } catch (VeicExistException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public void exibirMenu() {
@@ -29,7 +33,7 @@ public class Teste
         System.out.println("7. Sair do Sistema");
     }
 
-    public void controlarMenu() {
+    public void controlarMenu() throws VeicExistException {
         Scanner scanner = new Scanner(System.in);
         int opcao;
         do {
@@ -65,46 +69,61 @@ public class Teste
         scanner.close();
     }
 
+    private Map<String, Object> obterDadosBasicos(String tipoVeiculo) throws VeicExistException {
+        Scanner scanner = new Scanner(System.in);
+        Map<String, Object> dados = new HashMap<>();
+
+        System.out.println("Cadastro de Veículo de " + tipoVeiculo);
+        System.out.print("Placa: ");
+        String placa = leitura.entDados(scanner.nextLine());
+
+        if ((tipoVeiculo.equals("Passeio") && this.bd.isPasseioPresent(placa)) ||
+                (tipoVeiculo.equals("Carga") && this.bd.isCargaPresent(placa))) {
+            throw new VeicExistException();
+        }
+        dados.put("placa", placa);
+
+        System.out.print("Marca: ");
+        dados.put("marca", leitura.entDados(scanner.nextLine()));
+        System.out.print("Modelo: ");
+        dados.put("modelo", leitura.entDados(scanner.nextLine()));
+        System.out.print("Cor: ");
+        dados.put("cor", leitura.entDados(scanner.nextLine()));
+        System.out.print("Velocidade Máxima: ");
+        dados.put("velocMax", Float.parseFloat(leitura.entDados(scanner.nextLine())));
+        System.out.print("Quantidade de Rodas: ");
+        dados.put("qtdRodas", Integer.parseInt(leitura.entDados(scanner.nextLine())));
+        System.out.print("Quantidade de Pistões do motor: ");
+        dados.put("qtdPist", Integer.parseInt(leitura.entDados(scanner.nextLine())));
+        System.out.print("Potência do motor: ");
+        dados.put("potencia", Integer.parseInt(leitura.entDados(scanner.nextLine())));
+
+        return dados;
+    }
+
     private void cadastrarVeiculoPasseio() throws VeicExistException {
         Scanner scanner = new Scanner(System.in);
-        String resposta = "SIM";
+        String resposta;
+
         do {
-            scanner = new Scanner(System.in);
-            System.out.println("Cadastro de Veículo de Passeio");
-            System.out.print("Placa: ");
-            String placa = leitura.entDados(scanner.nextLine());
+            Map<String, Object> dados = obterDadosBasicos("Passeio");
 
-            if (Arrays.stream(veiculosPasseio).anyMatch(veiculo -> veiculo != null && veiculo.getPlaca().equalsIgnoreCase(placa))) {
-                throw new VeicExistException("Já existe um veículo com esta placa");
-            }
-
-            System.out.print("Marca: ");
-            String marca = leitura.entDados(scanner.nextLine());
-            System.out.print("Modelo: ");
-            String modelo = leitura.entDados(scanner.nextLine());
-            System.out.print("Cor: ");
-            String cor = leitura.entDados(scanner.nextLine());
-            System.out.print("Velocidade Máxima: ");
-            float velocMax = Float.parseFloat(leitura.entDados(scanner.nextLine()));
-            System.out.print("Quantidade de Rodas: ");
-            int qtdRodas = Integer.parseInt(leitura.entDados(scanner.nextLine()));
-            System.out.print("Quantidade de Pistões do motor: ");
-            int qtdPist = Integer.parseInt(leitura.entDados(scanner.nextLine()));
-            System.out.print("Potência do motor: ");
-            int potencia = Integer.parseInt(leitura.entDados(scanner.nextLine()));
             System.out.print("Quantidade de Passageiros: ");
             int qtdPassageiros = Integer.parseInt(leitura.entDados(scanner.nextLine()));
 
-            Passeio passeio = new Passeio(placa, marca, modelo, cor, velocMax, qtdRodas, qtdPist, potencia, qtdPassageiros);
+            Passeio passeio = new Passeio(
+                    (String) dados.get("placa"),
+                    (String) dados.get("marca"),
+                    (String) dados.get("modelo"),
+                    (String) dados.get("cor"),
+                    (float) dados.get("velocMax"),
+                    (int) dados.get("qtdRodas"),
+                    (int) dados.get("qtdPist"),
+                    (int) dados.get("potencia"),
+                    qtdPassageiros
+            );
 
-            int posicao = encontrarPosicaoLivre(veiculosPasseio);
-            if (posicao != -1) {
-                veiculosPasseio[posicao] = passeio;
-                System.out.println("Veículo de passeio cadastrado com sucesso!");
-            } else {
-                System.out.println("Não há espaço disponível para cadastrar mais veículos de passeio.");
-                continue;
-            }
+            this.bd.pushPasseio(passeio);
 
             System.out.println("Veículo de passeio cadastrado com sucesso!");
             System.out.println("Deseja cadastrar outro veiculo de passeio? (SIM/NAO)");
@@ -112,58 +131,43 @@ public class Teste
         } while (resposta.equals("SIM"));
     }
 
-    private void cadastrarVeiculoCarga() {
+    private void cadastrarVeiculoCarga() throws VeicExistException {
         Scanner scanner = new Scanner(System.in);
-        String resposta = "SIM";
+        String resposta;
 
         do {
-            System.out.println("Cadastro de Veículo de Carga");
-            System.out.print("Placa: ");
-            String placa = leitura.entDados(scanner.nextLine());
+            Map<String, Object> dados = obterDadosBasicos("Carga");
 
-            if (Arrays.stream(veiculosCarga).anyMatch(veiculo -> veiculo != null && veiculo.getPlaca().equalsIgnoreCase(placa))) {
-                System.out.println("Placa já cadastrada. Tente novamente.");
-                System.out.println("============================================");
-                System.out.println();
-                return;
-            }
-
-            System.out.print("Marca: ");
-            String marca = leitura.entDados(scanner.nextLine());
-            System.out.print("Modelo: ");
-            String modelo = leitura.entDados(scanner.nextLine());
-            System.out.print("Cor: ");
-            String cor = leitura.entDados(scanner.nextLine());
-            System.out.print("Velocidade Máxima: ");
-            float velocMax = Float.parseFloat(leitura.entDados(scanner.nextLine()));
-            System.out.print("Quantidade de Rodas: ");
-            int qtdRodas = Integer.parseInt(leitura.entDados(scanner.nextLine()));
-            System.out.print("Quantidade de Pistões do motor: ");
-            int qtdPist = Integer.parseInt(leitura.entDados(scanner.nextLine()));
-            System.out.print("Potência do motor: ");
-            int potencia = Integer.parseInt(leitura.entDados(scanner.nextLine()));
-            System.out.print("Carga maxima: ");
+            System.out.print("Carga máxima: ");
             int cargaMax = Integer.parseInt(leitura.entDados(scanner.nextLine()));
             System.out.print("Tara: ");
             int tara = Integer.parseInt(leitura.entDados(scanner.nextLine()));
 
-            Carga carga = new Carga(placa, marca, modelo, cor, velocMax, qtdRodas, qtdPist, potencia, cargaMax, tara);
+            Carga carga = new Carga(
+                    (String) dados.get("placa"),
+                    (String) dados.get("marca"),
+                    (String) dados.get("modelo"),
+                    (String) dados.get("cor"),
+                    (float) dados.get("velocMax"),
+                    (int) dados.get("qtdRodas"),
+                    (int) dados.get("qtdPist"),
+                    (int) dados.get("potencia"),
+                    cargaMax,
+                    tara
+            );
 
-            int posicao = encontrarPosicaoLivre(veiculosCarga);
-            if (posicao != -1) {
-                veiculosCarga[posicao] = carga;
-                System.out.println("Veículo de passeio cadastrado com sucesso!");
-            } else {
-                System.out.println("Não há espaço disponível para cadastrar mais veículos de passeio.");
-            }
+            this.bd.pushCarga(carga);
 
+            System.out.println("Veículo de carga cadastrado com sucesso!");
             System.out.println("Deseja cadastrar outro veiculo de carga? (SIM/NAO)");
             resposta = leitura.entDados(scanner.nextLine()).toUpperCase();
         } while (resposta.equals("SIM"));
     }
 
     private void imprimirTodosVeiculosPasseio() {
-        if (isArrayEmpty(veiculosPasseio)) {
+        Passeio[] listaPasseio = this.bd.getListaPasseio();
+
+        if (isArrayEmpty(listaPasseio)) {
             System.out.println("Nenhum veículo de passeio cadastrado.");
             System.out.println("Cadastre um veículo de passeio para visualizar.");
             System.out.println("============================================");
@@ -173,7 +177,7 @@ public class Teste
 
         System.out.println("=== Veículos de Passeio ===");
 
-        for (Passeio passeio : veiculosPasseio) {
+        for (Passeio passeio : listaPasseio) {
             System.out.println(passeio);
             System.out.println("--------------------------------------------");
             System.out.println();
@@ -184,7 +188,10 @@ public class Teste
     }
 
     private void imprimirTodosVeiculosCarga() {
-        if (isArrayEmpty(veiculosCarga)) {
+
+        Carga[] listaCarga = this.bd.getListaCarga();
+
+        if (isArrayEmpty(listaCarga)) {
             System.out.println("Nenhum veículo de carga cadastrado.");
             System.out.println("Cadastre um veículo de carga para visualizar.");
             System.out.println("============================================");
@@ -193,7 +200,7 @@ public class Teste
         }
 
         System.out.println("=== Veículos de Carga ===");
-        for (Carga carga : veiculosCarga) {
+        for (Carga carga : listaCarga) {
             System.out.println(carga);
             System.out.println("--------------------------------------------");
             System.out.println();
@@ -207,6 +214,9 @@ public class Teste
         Scanner scanner = new Scanner(System.in);
         System.out.print("Digite a placa do veículo de passeio: ");
         String placa = leitura.entDados(scanner.nextLine());
+
+        Passeio[] veiculosPasseio = this.bd.getListaPasseio();
+
         for (Passeio passeio : veiculosPasseio) {
             if (passeio.getPlaca().equalsIgnoreCase(placa)) {
                 System.out.println(passeio);
@@ -226,6 +236,9 @@ public class Teste
         Scanner scanner = new Scanner(System.in);
         System.out.print("Digite a placa do veículo de passeio: ");
         String placa = leitura.entDados(scanner.nextLine());
+
+        Carga[] veiculosCarga = this.bd.getListaCarga();
+
         for (Carga carga : veiculosCarga) {
             if (carga.getPlaca().equalsIgnoreCase(placa)) {
                 System.out.println(carga);
@@ -239,15 +252,6 @@ public class Teste
         System.out.println("Veículo de carga não encontrado.");
         System.out.println("============================================");
         System.out.println();
-    }
-
-    private int encontrarPosicaoLivre(Object[] veiculos) {
-        for (int i = 0; i < veiculos.length; i++) {
-            if (veiculos[i] == null) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     private boolean isArrayEmpty(Object[] array) {
