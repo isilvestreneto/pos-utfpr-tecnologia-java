@@ -1,20 +1,3 @@
-<<<<<<< HEAD
-# Pós-Graduação em Java - UTFPR
-
-Este repositório centraliza todo o conteúdo explorado durante a minha pós-graduação em Java na Universidade Tecnológica Federal do Paraná (UTFPR).
-
-## Instalação
-
-Para instalar e configurar os projetos deste repositório, siga as instruções específicas em cada subdiretório.
-
-## Uso
-
-Cada módulo contém atividades e projetos específicos. Consulte os arquivos README.md dentro de cada subdiretório para mais detalhes sobre como executar e utilizar os projetos.
-
-## Créditos
-
-Este repositório foi desenvolvido como parte da pós-graduação em Java na UTFPR.
-=======
 # Estudos de Pós-Graduação em Java
 
 Este repositório contém meus estudos, projetos e anotações desenvolvidos ao longo da minha pós-graduação em **Java**. Aqui você encontrará materiais relacionados às diversas disciplinas do curso, abordando desde o básico da linguagem até tópicos avançados em frameworks, padrões de projeto, desenvolvimento mobile, web, microserviços, integração contínua, testes, entre outros.
@@ -148,4 +131,3 @@ Para contribuir:
 ## Licença
 
 Este projeto está licenciado sob a licença [MIT](LICENSE). Sinta-se à vontade para utilizar os códigos, adaptar e aprender com os exemplos.
->>>>>>> 65f3268a51bacb2349e83079705764a855bc73be

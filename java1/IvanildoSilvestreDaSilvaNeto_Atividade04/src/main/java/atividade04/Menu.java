@@ -4,6 +4,7 @@
  */
 package atividade04;
 
+<<<<<<<< HEAD:java1/IvanildoSilvestreDaSilvaNeto_Atividade04/src/main/java/atividade04/Menu.java
 /**
  *
  * @author ivneto
@@ -21,6 +22,28 @@ public class Menu {
         veiculosPasseio = new Passeio[5];
         veiculosCarga = new Carga[5];
         leitura = new Leitura();
+========
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+/**
+ * Hello world!
+ *
+ */
+public class Teste
+{
+    private final Leitura leitura = new Leitura();
+    private final BDVeiculos bd = new BDVeiculos();
+
+    public static void main( String[] args ) {
+        Teste teste = new Teste();
+        try {
+            teste.controlarMenu();
+        } catch (VeicExistException e) {
+            System.out.println(e.getMessage());
+        }
+>>>>>>>> 65f3268a51bacb2349e83079705764a855bc73be:java1/IvanildoSilvestreDaSilvaNeto_Atividade06/src/main/java/org/example/Teste.java
     }
 
     public void exibirMenu() {
@@ -34,7 +57,7 @@ public class Menu {
         System.out.println("7. Sair do Sistema");
     }
 
-    public void controlarMenu() {
+    public void controlarMenu() throws VeicExistException {
         Scanner scanner = new Scanner(System.in);
         int opcao;
         do {
@@ -63,10 +86,48 @@ public class Menu {
         scanner.close();
     }
 
+<<<<<<<< HEAD:java1/IvanildoSilvestreDaSilvaNeto_Atividade04/src/main/java/atividade04/Menu.java
     private void cadastrarVeiculoPasseio() {
+========
+    private Map<String, Object> obterDadosBasicos(String tipoVeiculo) throws VeicExistException {
         Scanner scanner = new Scanner(System.in);
-        String resposta = "SIM";
+        Map<String, Object> dados = new HashMap<>();
+
+        System.out.println("Cadastro de Veículo de " + tipoVeiculo);
+        System.out.print("Placa: ");
+        String placa = leitura.entDados(scanner.nextLine());
+
+        if ((tipoVeiculo.equals("Passeio") && this.bd.isPasseioPresent(placa)) ||
+                (tipoVeiculo.equals("Carga") && this.bd.isCargaPresent(placa))) {
+            throw new VeicExistException();
+        }
+        dados.put("placa", placa);
+
+        System.out.print("Marca: ");
+        dados.put("marca", leitura.entDados(scanner.nextLine()));
+        System.out.print("Modelo: ");
+        dados.put("modelo", leitura.entDados(scanner.nextLine()));
+        System.out.print("Cor: ");
+        dados.put("cor", leitura.entDados(scanner.nextLine()));
+        System.out.print("Velocidade Máxima: ");
+        dados.put("velocMax", Float.parseFloat(leitura.entDados(scanner.nextLine())));
+        System.out.print("Quantidade de Rodas: ");
+        dados.put("qtdRodas", Integer.parseInt(leitura.entDados(scanner.nextLine())));
+        System.out.print("Quantidade de Pistões do motor: ");
+        dados.put("qtdPist", Integer.parseInt(leitura.entDados(scanner.nextLine())));
+        System.out.print("Potência do motor: ");
+        dados.put("potencia", Integer.parseInt(leitura.entDados(scanner.nextLine())));
+
+        return dados;
+    }
+
+    private void cadastrarVeiculoPasseio() throws VeicExistException {
+>>>>>>>> 65f3268a51bacb2349e83079705764a855bc73be:java1/IvanildoSilvestreDaSilvaNeto_Atividade06/src/main/java/org/example/Teste.java
+        Scanner scanner = new Scanner(System.in);
+        String resposta;
+
         do {
+<<<<<<<< HEAD:java1/IvanildoSilvestreDaSilvaNeto_Atividade04/src/main/java/atividade04/Menu.java
             System.out.println("Cadastro de Veiculo de Passeio");
             System.out.print("Placa: ");
             String placa = leitura.entDados(scanner.nextLine());
@@ -107,11 +168,34 @@ public class Menu {
             }
 
             System.out.println("Veiculo de passeio cadastrado com sucesso!");
+========
+            Map<String, Object> dados = obterDadosBasicos("Passeio");
+
+            System.out.print("Quantidade de Passageiros: ");
+            int qtdPassageiros = Integer.parseInt(leitura.entDados(scanner.nextLine()));
+
+            Passeio passeio = new Passeio(
+                    (String) dados.get("placa"),
+                    (String) dados.get("marca"),
+                    (String) dados.get("modelo"),
+                    (String) dados.get("cor"),
+                    (float) dados.get("velocMax"),
+                    (int) dados.get("qtdRodas"),
+                    (int) dados.get("qtdPist"),
+                    (int) dados.get("potencia"),
+                    qtdPassageiros
+            );
+
+            this.bd.pushPasseio(passeio);
+
+            System.out.println("Veículo de passeio cadastrado com sucesso!");
+>>>>>>>> 65f3268a51bacb2349e83079705764a855bc73be:java1/IvanildoSilvestreDaSilvaNeto_Atividade06/src/main/java/org/example/Teste.java
             System.out.println("Deseja cadastrar outro veiculo de passeio? (SIM/NAO)");
             resposta = leitura.entDados(scanner.nextLine()).toUpperCase();
         } while (resposta.equals("SIM"));
     }
 
+<<<<<<<< HEAD:java1/IvanildoSilvestreDaSilvaNeto_Atividade04/src/main/java/atividade04/Menu.java
     private boolean verificarSeHaPlacaCadastrada(String placa) {
         return (Arrays.stream(veiculosPasseio).anyMatch(veiculo -> veiculo != null && veiculo.getPlaca().equalsIgnoreCase(placa)))
                 || (Arrays.stream(veiculosCarga).anyMatch(veiculo -> veiculo != null && veiculo.getPlaca().equalsIgnoreCase(placa)));
@@ -148,12 +232,34 @@ public class Menu {
             System.out.print("Potencia do motor: ");
             int potencia = Integer.parseInt(leitura.entDados(scanner.nextLine()));
             System.out.print("Carga maxima: ");
+========
+    private void cadastrarVeiculoCarga() throws VeicExistException {
+        Scanner scanner = new Scanner(System.in);
+        String resposta;
+
+        do {
+            Map<String, Object> dados = obterDadosBasicos("Carga");
+
+            System.out.print("Carga máxima: ");
+>>>>>>>> 65f3268a51bacb2349e83079705764a855bc73be:java1/IvanildoSilvestreDaSilvaNeto_Atividade06/src/main/java/org/example/Teste.java
             int cargaMax = Integer.parseInt(leitura.entDados(scanner.nextLine()));
             System.out.print("Tara: ");
             int tara = Integer.parseInt(leitura.entDados(scanner.nextLine()));
 
-            Carga carga = new Carga(placa, marca, modelo, cor, velocMax, qtdRodas, qtdPist, potencia, cargaMax, tara);
+            Carga carga = new Carga(
+                    (String) dados.get("placa"),
+                    (String) dados.get("marca"),
+                    (String) dados.get("modelo"),
+                    (String) dados.get("cor"),
+                    (float) dados.get("velocMax"),
+                    (int) dados.get("qtdRodas"),
+                    (int) dados.get("qtdPist"),
+                    (int) dados.get("potencia"),
+                    cargaMax,
+                    tara
+            );
 
+<<<<<<<< HEAD:java1/IvanildoSilvestreDaSilvaNeto_Atividade04/src/main/java/atividade04/Menu.java
             int posicao = encontrarPosicaoLivre(veiculosCarga);
             if (posicao != -1) {
                 veiculosCarga[posicao] = carga;
@@ -161,16 +267,28 @@ public class Menu {
             } else {
                 System.out.println("Não ha espaco disponivel para cadastrar mais veiculos de passeio.");
             }
+========
+            this.bd.pushCarga(carga);
+>>>>>>>> 65f3268a51bacb2349e83079705764a855bc73be:java1/IvanildoSilvestreDaSilvaNeto_Atividade06/src/main/java/org/example/Teste.java
 
+            System.out.println("Veículo de carga cadastrado com sucesso!");
             System.out.println("Deseja cadastrar outro veiculo de carga? (SIM/NAO)");
             resposta = leitura.entDados(scanner.nextLine()).toUpperCase();
         } while (resposta.equals("SIM"));
     }
 
     private void imprimirTodosVeiculosPasseio() {
+<<<<<<<< HEAD:java1/IvanildoSilvestreDaSilvaNeto_Atividade04/src/main/java/atividade04/Menu.java
         if (isArrayEmpty(veiculosPasseio)) {
             System.out.println("Nenhum veiculo de passeio cadastrado.");
             System.out.println("Cadastre um veiculo de passeio para visualizar.");
+========
+        Passeio[] listaPasseio = this.bd.getListaPasseio();
+
+        if (isArrayEmpty(listaPasseio)) {
+            System.out.println("Nenhum veículo de passeio cadastrado.");
+            System.out.println("Cadastre um veículo de passeio para visualizar.");
+>>>>>>>> 65f3268a51bacb2349e83079705764a855bc73be:java1/IvanildoSilvestreDaSilvaNeto_Atividade06/src/main/java/org/example/Teste.java
             System.out.println("============================================");
             System.out.println();
             return;
@@ -178,12 +296,19 @@ public class Menu {
 
         System.out.println("=== Veiculos de Passeio ===");
 
+<<<<<<<< HEAD:java1/IvanildoSilvestreDaSilvaNeto_Atividade04/src/main/java/atividade04/Menu.java
         for (Passeio passeio : veiculosPasseio) {
             if (passeio != null) {
                 System.out.println(passeio);
                 System.out.println("--------------------------------------------");
                 System.out.println();
             }
+========
+        for (Passeio passeio : listaPasseio) {
+            System.out.println(passeio);
+            System.out.println("--------------------------------------------");
+            System.out.println();
+>>>>>>>> 65f3268a51bacb2349e83079705764a855bc73be:java1/IvanildoSilvestreDaSilvaNeto_Atividade06/src/main/java/org/example/Teste.java
         }
 
         System.out.println("============================================");
@@ -191,14 +316,24 @@ public class Menu {
     }
 
     private void imprimirTodosVeiculosCarga() {
+<<<<<<<< HEAD:java1/IvanildoSilvestreDaSilvaNeto_Atividade04/src/main/java/atividade04/Menu.java
         if (isArrayEmpty(veiculosCarga)) {
             System.out.println("Nenhum veiculo de carga cadastrado.");
             System.out.println("Cadastre um veiculo de carga para visualizar.");
+========
+
+        Carga[] listaCarga = this.bd.getListaCarga();
+
+        if (isArrayEmpty(listaCarga)) {
+            System.out.println("Nenhum veículo de carga cadastrado.");
+            System.out.println("Cadastre um veículo de carga para visualizar.");
+>>>>>>>> 65f3268a51bacb2349e83079705764a855bc73be:java1/IvanildoSilvestreDaSilvaNeto_Atividade06/src/main/java/org/example/Teste.java
             System.out.println("============================================");
             System.out.println();
             return;
         }
 
+<<<<<<<< HEAD:java1/IvanildoSilvestreDaSilvaNeto_Atividade04/src/main/java/atividade04/Menu.java
         System.out.println("=== Veiculos de Carga ===");
         for (Carga carga : veiculosCarga) {
             if (carga != null) {
@@ -206,6 +341,13 @@ public class Menu {
                 System.out.println("--------------------------------------------");
                 System.out.println();
             }
+========
+        System.out.println("=== Veículos de Carga ===");
+        for (Carga carga : listaCarga) {
+            System.out.println(carga);
+            System.out.println("--------------------------------------------");
+            System.out.println();
+>>>>>>>> 65f3268a51bacb2349e83079705764a855bc73be:java1/IvanildoSilvestreDaSilvaNeto_Atividade06/src/main/java/org/example/Teste.java
         }
 
         System.out.println("============================================");
@@ -216,6 +358,9 @@ public class Menu {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Digite a placa do veiculo de passeio: ");
         String placa = leitura.entDados(scanner.nextLine());
+
+        Passeio[] veiculosPasseio = this.bd.getListaPasseio();
+
         for (Passeio passeio : veiculosPasseio) {
             if (passeio != null && passeio.getPlaca().equalsIgnoreCase(placa)) {
                 System.out.println(passeio);
@@ -235,6 +380,9 @@ public class Menu {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Digite a placa do veiculo de passeio: ");
         String placa = leitura.entDados(scanner.nextLine());
+
+        Carga[] veiculosCarga = this.bd.getListaCarga();
+
         for (Carga carga : veiculosCarga) {
             if (carga!= null && carga.getPlaca().equalsIgnoreCase(placa)) {
                 System.out.println(carga);
@@ -248,15 +396,6 @@ public class Menu {
         System.out.println("Veiculo de carga nao encontrado.");
         System.out.println("============================================");
         System.out.println();
-    }
-
-    private int encontrarPosicaoLivre(Object[] veiculos) {
-        for (int i = 0; i < veiculos.length; i++) {
-            if (veiculos[i] == null) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     private boolean isArrayEmpty(Object[] array) {
