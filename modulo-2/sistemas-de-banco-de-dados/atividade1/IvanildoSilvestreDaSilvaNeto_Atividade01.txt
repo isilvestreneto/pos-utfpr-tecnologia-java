@@ -1,0 +1,140 @@
+SELECT cantor.nome_cantor, gravacoes.num_gravacoes
+FROM cantor, (
+SELECT gravacao.cod_cantor AS codCantor, COUNT(cod_cantor) AS num_gravacoes
+FROM gravacao
+GROUP BY gravacao.cod_cantor) AS gravacoes
+WHERE cantor.cod_cantor = gravacoes.codCantor
+GROUP BY cantor.cod_cantor
+HAVING gravacoes.num_gravacoes = (
+SELECT MIN(r.num_gravacoes) AS min_gravacoes
+FROM
+ (
+SELECT cod_cantor, COUNT(cod_cantor) AS num_gravacoes
+FROM gravacao
+GROUP BY gravacao.cod_cantor) AS r);
+
+SELECT 
+    nome_cantor,
+    num_gravadoras
+FROM (
+    SELECT 
+        cantor.nome_cantor AS nome_cantor,
+        COUNT(DISTINCT gravadora.nome_gravadora) AS num_gravadoras
+    FROM 
+        gravacao
+    JOIN 
+        cantor ON gravacao.cod_cantor = cantor.cod_cantor
+    JOIN 
+        gravadora ON gravacao.cod_gravadora = gravadora.cod_gravadora
+    GROUP BY 
+        cantor.nome_cantor
+) AS resultados
+WHERE 
+    num_gravadoras = (
+        SELECT MAX(num_gravadoras)
+        FROM (
+            SELECT 
+                COUNT(DISTINCT gravadora.nome_gravadora) AS num_gravadoras
+            FROM 
+                gravacao
+            JOIN 
+                cantor ON gravacao.cod_cantor = cantor.cod_cantor
+            JOIN 
+                gravadora ON gravacao.cod_gravadora = gravadora.cod_gravadora
+            GROUP BY 
+                cantor.nome_cantor
+        ) AS subquery
+    );
+
+SELECT 
+    nome_cantor,
+    media_duracao
+FROM (
+    SELECT 
+        cantor.nome_cantor AS nome_cantor,
+        SUM(musica.duracao) / COUNT(musica.cod_musica) AS media_duracao
+    FROM 
+        gravacao
+    JOIN 
+        cantor ON gravacao.cod_cantor = cantor.cod_cantor
+    JOIN 
+        musica ON gravacao.cod_musica = musica.cod_musica
+    GROUP BY 
+        cantor.nome_cantor
+) AS medias
+WHERE 
+    media_duracao = (
+        SELECT MAX(media_duracao) 
+        FROM (
+            SELECT 
+                SUM(musica.duracao) / COUNT(musica.cod_musica) AS media_duracao
+            FROM 
+                gravacao
+            JOIN 
+                cantor ON gravacao.cod_cantor = cantor.cod_cantor
+            JOIN 
+                musica ON gravacao.cod_musica = musica.cod_musica
+            GROUP BY 
+                cantor.nome_cantor
+        ) AS subquery
+    );
+	
+SELECT DISTINCT 
+    cantor.nome_cantor AS nome_cantor
+FROM 
+    gravacao
+JOIN 
+    cantor ON gravacao.cod_cantor = cantor.cod_cantor
+JOIN 
+    gravadora ON gravacao.cod_gravadora = gravadora.cod_gravadora
+WHERE 
+    cantor.cod_cantor NOT IN (
+        SELECT DISTINCT gravacao.cod_cantor
+        FROM 
+            gravacao
+        JOIN 
+            gravadora ON gravacao.cod_gravadora = gravadora.cod_gravadora
+        WHERE 
+            gravadora.nome_gravadora = 'Sony'
+    );
+
+SELECT 
+    cantor.nome_cantor AS nome_cantor,
+    musica.titulo AS nome_musica,
+    gravacao.data_gravacao AS data_gravacao
+FROM 
+    gravacao
+JOIN 
+    cantor ON gravacao.cod_cantor = cantor.cod_cantor
+JOIN 
+    musica ON gravacao.cod_musica = musica.cod_musica
+WHERE 
+    YEAR(gravacao.data_gravacao) = 2004;
+
+SELECT 
+    cantor.nome_cantor AS nome_cantor,
+    COALESCE(MAX(gravacao.data_gravacao), '') AS ultima_gravacao
+FROM 
+    cantor
+LEFT JOIN 
+    gravacao ON cantor.cod_cantor = gravacao.cod_cantor
+GROUP BY 
+    cantor.nome_cantor
+ORDER BY 
+    ultima_gravacao DESC;
+
+SELECT 
+    pessoa.nome_pessoa AS nome_pessoa,
+    GROUP_CONCAT(CASE WHEN fone.tipo = 'R' THEN fone.numero END) AS residencial,
+    GROUP_CONCAT(CASE WHEN fone.tipo = 'C' THEN fone.numero END) AS comercial,
+    GROUP_CONCAT(CASE WHEN fone.tipo = 'L' THEN fone.numero END) AS celular
+FROM 
+    pessoa
+LEFT JOIN 
+    fone ON pessoa.cod_pessoa = fone.cod_pessoa
+GROUP BY 
+    pessoa.nome_pessoa
+HAVING 
+    residencial IS NOT NULL OR comercial IS NOT NULL OR celular IS NOT NULL
+ORDER BY 
+    pessoa.nome_pessoa;
